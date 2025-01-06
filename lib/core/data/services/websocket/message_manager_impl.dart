@@ -1,4 +1,5 @@
-import '../websocket_client/websocket_client.dart';
+import 'package:chat_app_clean/core/data/services/websocket/websocket_client.dart';
+
 import 'message_manager.dart';
 
 class MessageManagerImpl implements MessageManager {

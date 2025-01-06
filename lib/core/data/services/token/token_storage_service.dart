@@ -1,9 +1,9 @@
 import 'package:hive/hive.dart';
 
-class DataBaseService {
+class TokenStorageService {
   late Box<String> tokenBox;
 
-  DataBaseService({
+  TokenStorageService({
     required this.tokenBox,
   });
 

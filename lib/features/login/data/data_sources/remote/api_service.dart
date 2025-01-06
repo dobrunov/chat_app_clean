@@ -3,13 +3,13 @@ import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 
-import 'constants.dart';
-import 'data_base_service.dart';
+import '../../../../../core/constants.dart';
+import '../../../../../core/data/services/token/token_storage_service.dart';
 
 class ApiService {
-  final DataBaseService dataBaseService;
+  final TokenStorageService tokenStorageService;
 
-  ApiService({required this.dataBaseService});
+  ApiService({required this.tokenStorageService});
 
   Future<String?> login(String username) async {
     const baseUrl = MyConstants.baseUrl;
@@ -29,7 +29,7 @@ class ApiService {
         log(response.statusCode.toString());
 
         final data = jsonDecode(response.body);
-        await dataBaseService.saveToken(data['token']);
+        await tokenStorageService.saveToken(data['token']);
         return data['token'];
       } else {
         throw Exception('Login failed with status code ${response.statusCode}');
@@ -43,7 +43,7 @@ class ApiService {
     const baseUrl = MyConstants.baseUrl;
     final url = Uri.parse('$baseUrl/logout');
 
-    final token = await dataBaseService.getToken();
+    final token = await tokenStorageService.getToken();
 
     try {
       final response = await http.post(

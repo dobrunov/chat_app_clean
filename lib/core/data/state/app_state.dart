@@ -3,10 +3,13 @@ import 'dart:developer';
 
 import 'package:mobx/mobx.dart';
 
-import '../message_manager/message_manager.dart';
-import '../socket_messages/socket_messages_type.dart';
+import '../../../features/chat/presentation/chat_state.dart';
+import '../../../socket_messages/socket_messages_type.dart';
+import '../services/websocket/message_manager.dart';
 
 part 'app_state.g.dart';
+
+//  dart run build_runner build --delete-conflicting-outputs
 
 class AppState = AppStoreBase with _$AppState;
 
@@ -14,12 +17,13 @@ abstract class AppStoreBase with Store {
   final MessageManager messageManager;
 
   AppStoreBase(this.messageManager) {
+    chatState.sendMessage = (message) => sendMessageToServer(message);
     _handleIncomingMessages();
     _handleConnectedState();
   }
 
   @observable
-  int param = 0;
+  ChatState chatState = ChatState();
 
   @observable
   bool connected = false;
@@ -42,7 +46,7 @@ abstract class AppStoreBase with Store {
 
       switch (decodedMessage['type']) {
         case SocketMessagesType.updateOne:
-          updateParam(decodedMessage['data']);
+          chatState.addMessageFromServer(decodedMessage['data']);
           break;
         default:
           log("[Unhandled message type]: ${decodedMessage['type']}");
@@ -51,17 +55,17 @@ abstract class AppStoreBase with Store {
   }
 
   @action
-  void updateParam(data) {
-    param = param + 1;
+  void sendMessageToServer(Map<String, dynamic> message) {
+    messageManager.sendMessage(message);
   }
 
   @action
   void methodOne() {
-    param++;
+    //
   }
 
   @action
-  void updateServerParam(Map<String, String> message) {
-    messageManager.sendMessage(message);
+  void methodTwo(message) {
+    //
   }
 }

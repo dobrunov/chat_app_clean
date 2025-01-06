@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:chat_app_clean/websocket_client/websocket_client.dart';
+import 'package:chat_app_clean/core/data/services/websocket/websocket_client.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketClientImpl implements WebSocketClient {

@@ -1,15 +1,15 @@
-import 'package:chat_app_clean/services/api_service.dart';
-import 'package:chat_app_clean/services/data_base_service.dart';
+import 'package:chat_app_clean/core/data/services/token/token_storage_service.dart';
+import 'package:chat_app_clean/core/data/state/app_state.dart';
+import 'package:chat_app_clean/features/login/data/data_sources/remote/api_service.dart';
 import 'package:chat_app_clean/socket_messages/app_socket_messages.dart';
 import 'package:chat_app_clean/socket_messages/app_socket_messages_impl.dart';
-import 'package:chat_app_clean/state/app_state.dart';
-import 'package:chat_app_clean/websocket_client/websocket_client_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
+import 'core/data/services/websocket/message_manager_impl.dart';
+import 'core/data/services/websocket/websocket_client_impl.dart';
 import 'home_page.dart';
-import 'message_manager/message_manager_impl.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -24,8 +24,8 @@ void main() async {
       providers: [
         Provider<AppState>(create: (_) => appState),
         Provider<AppSocketMessages>(create: (_) => AppSocketMessagesImpl(appState)),
-        Provider<DataBaseService>(create: (_) => DataBaseService(tokenBox: tokenBox)),
-        Provider<ApiService>(create: (_) => ApiService(dataBaseService: DataBaseService(tokenBox: tokenBox))),
+        Provider<TokenStorageService>(create: (_) => TokenStorageService(tokenBox: tokenBox)),
+        Provider<ApiService>(create: (_) => ApiService(tokenStorageService: TokenStorageService(tokenBox: tokenBox))),
       ],
       child: const MyApp(),
     ),

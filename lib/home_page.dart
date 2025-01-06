@@ -1,8 +1,9 @@
-import 'package:chat_app_clean/socket_messages/app_socket_messages.dart';
-import 'package:chat_app_clean/state/app_state.dart';
+import 'package:chat_app_clean/core/data/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+
+import 'features/chat/presentation/chat_state.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -15,12 +16,12 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   late AppState appState;
-  late AppSocketMessages appSocketMessages;
+  late ChatState chatState;
 
   @override
   void didChangeDependencies() {
     appState = context.watch<AppState>();
-    appSocketMessages = context.watch<AppSocketMessages>();
+    chatState = context.watch<ChatState>();
     super.didChangeDependencies();
   }
 
@@ -48,26 +49,19 @@ class HomePageState extends State<HomePage> {
             ),
             const Padding(
               padding: EdgeInsets.all(8.0),
-              child: Text('Text'),
+              child: Text('Message'),
             ),
             Observer(builder: (context) {
               return Text(
-                appState.param.toString(),
+                chatState.message.toString(),
                 style: Theme.of(context).textTheme.headlineMedium,
               );
             }),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                onPressed: () => appSocketMessages.methodOne(),
+                onPressed: () => chatState.sendChatMessage("TestMessage"),
                 child: const Text('Action 1'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () => appSocketMessages.methodTwo(),
-                child: const Text('Action 2'),
               ),
             ),
           ],

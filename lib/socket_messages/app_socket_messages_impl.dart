@@ -1,6 +1,6 @@
 import 'package:chat_app_clean/socket_messages/socket_messages_type.dart';
 
-import '../state/app_state.dart';
+import '../core/data/state/app_state.dart';
 import 'app_socket_messages.dart';
 
 class AppSocketMessagesImpl implements AppSocketMessages {
@@ -19,6 +19,6 @@ class AppSocketMessagesImpl implements AppSocketMessages {
       "type": SocketMessagesType.typeOne,
       "data": "dataOne",
     };
-    appState.updateServerParam(message);
+    appState.methodTwo(message);
   }
 }
