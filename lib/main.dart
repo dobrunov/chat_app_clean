@@ -9,38 +9,50 @@ import 'package:provider/provider.dart';
 
 import 'core/data/services/websocket/message_manager_impl.dart';
 import 'core/data/services/websocket/websocket_client_impl.dart';
-import 'home_page.dart';
+import 'features/chat/presentation/chat_state.dart';
+import 'login_page.dart';
 
 void main() async {
   await Hive.initFlutter();
   final tokenBox = await Hive.openBox<String>('token');
+  final tokenStorageService = TokenStorageService(tokenBox: tokenBox);
 
   final webSocketClient = WebSocketClientImpl("ws://127.0.0.1:8080");
   final messageManager = MessageManagerImpl(webSocketClient);
   final appState = AppState(messageManager);
 
+  final chatState = ChatState();
+  chatState.sendMessage = (message) {
+    debugPrint("Sending message: $message");
+  };
+
   runApp(
     MultiProvider(
       providers: [
         Provider<AppState>(create: (_) => appState),
+        Provider<ChatState>(create: (_) => chatState),
         Provider<AppSocketMessages>(create: (_) => AppSocketMessagesImpl(appState)),
-        Provider<TokenStorageService>(create: (_) => TokenStorageService(tokenBox: tokenBox)),
-        Provider<ApiService>(create: (_) => ApiService(tokenStorageService: TokenStorageService(tokenBox: tokenBox))),
+        Provider<TokenStorageService>(create: (_) => tokenStorageService),
+        Provider<ApiService>(create: (_) => ApiService(tokenStorageService: tokenStorageService)),
       ],
-      child: const MyApp(),
+      child: MyApp(tokenStorageService: tokenStorageService),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final TokenStorageService tokenStorageService;
+
+  const MyApp({super.key, required this.tokenStorageService});
 
   @override
   Widget build(BuildContext context) {
+    const initialRoute = LoginPage();
+
     return MaterialApp(
       title: 'Basic WebSocket App with MobX',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomePage(),
+      home: initialRoute,
     );
   }
 }

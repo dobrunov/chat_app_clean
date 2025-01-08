@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:chat_app_clean/core/data/services/websocket/websocket_client.dart';
+import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-class WebSocketClientImpl implements WebSocketClient {
+class WebSocketClientImpl {
   final String url;
+  final String token;
   final int delay;
   int _reconnectAttempts = 0;
   static const int maxReconnectAttempts = 5;
@@ -16,30 +17,30 @@ class WebSocketClientImpl implements WebSocketClient {
 
   void _updateConnectionState(bool newState) => _connectionStateController.add(newState);
 
-  WebSocketClientImpl(this.url, {this.delay = 5}) {
-    _updateConnectionState(true);
+  WebSocketClientImpl(this.url, this.token, {this.delay = 5}) {
+    _updateConnectionState(false);
     connect();
   }
 
-  @override
   Stream<bool> get connectionStateStream => _connectionStateController.stream;
 
-  @override
-  connect() {
+  void connect() {
     disconnect();
-    //
-    _channel = WebSocketChannel.connect(Uri.parse(url));
+
+    final uri = Uri.parse('$url?token=$token');
+    log('Connecting to WebSocket: $uri');
+    _channel = WebSocketChannel.connect(uri);
 
     _channel?.stream.listen(
-      (event) => _handleMessage(event),
-      onError: (error) => _onConnectionError(error),
+      _handleMessage,
+      onError: _onConnectionError,
       onDone: _onConnectionDone,
     );
   }
 
   void _handleMessage(dynamic event) {
     _updateConnectionState(true);
-    log("[Incoming message]: $event");
+    log('[Incoming message]: $event');
     _controller.add(event);
   }
 
@@ -53,13 +54,13 @@ class WebSocketClientImpl implements WebSocketClient {
   void _onConnectionDone() {
     _updateConnectionState(false);
     log('[WebSocket Disconnected]');
-    _controller.close();
     _handleReconnect();
   }
 
   void _handleReconnect() async {
     if (_reconnectAttempts < maxReconnectAttempts) {
       _reconnectAttempts++;
+      log('[Reconnecting... Attempt $_reconnectAttempts]');
       await Future.delayed(Duration(seconds: delay));
       connect();
     } else {
@@ -67,25 +68,22 @@ class WebSocketClientImpl implements WebSocketClient {
     }
   }
 
-  @override
-  disconnect() {
-    _channel?.sink.close();
+  void disconnect() {
+    _channel?.sink.close(status.normalClosure);
     _channel = null;
   }
 
-  @override
   Stream<String> get messages => _controller.stream;
 
-  @override
   void sendMessage(Map<String, dynamic> message) {
     final messageJson = jsonEncode(message);
-    log("[Sending message]: $messageJson");
+    log('[Sending message]: $messageJson');
     _channel?.sink.add(messageJson);
   }
-}
 
-//   void dispose() {
-//     _webSocketChannel?.sink.close();
-//     _webSocketChannel = null;
-//   }
-// }
+  void dispose() {
+    disconnect();
+    _controller.close();
+    _connectionStateController.close();
+  }
+}

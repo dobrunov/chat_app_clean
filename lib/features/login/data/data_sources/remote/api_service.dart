@@ -12,7 +12,7 @@ class ApiService {
   ApiService({required this.tokenStorageService});
 
   Future<String?> login(String username) async {
-    const baseUrl = MyConstants.baseUrl;
+    const baseUrl = MyConstants.baseUrlAPI;
     final url = Uri.parse('$baseUrl/login');
     final body = jsonEncode({
       'username': username,
@@ -40,7 +40,7 @@ class ApiService {
   }
 
   Future<void> logout(String token) async {
-    const baseUrl = MyConstants.baseUrl;
+    const baseUrl = MyConstants.baseUrlAPI;
     final url = Uri.parse('$baseUrl/logout');
 
     final token = await tokenStorageService.getToken();

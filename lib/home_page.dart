@@ -17,12 +17,19 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   late AppState appState;
   late ChatState chatState;
+  final TextEditingController _messageController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     appState = context.watch<AppState>();
     chatState = context.watch<ChatState>();
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,6 +64,31 @@ class HomePageState extends State<HomePage> {
                 style: Theme.of(context).textTheme.headlineMedium,
               );
             }),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _messageController,
+                decoration: InputDecoration(
+                  labelText: 'Enter your message',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  final message = _messageController.text.trim();
+                  if (message.isNotEmpty) {
+                    chatState.sendChatMessage(message);
+                    _messageController.clear();
+                  }
+                },
+                child: const Text('Send Message'),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
